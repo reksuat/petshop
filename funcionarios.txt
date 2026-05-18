@@ -1,0 +1,2 @@
+Oliver Oliveira;111.222.333-44;42 99999-1111;Oliver@pet.com;M01;Veterinario;5000.0
+Nick Jam;555.666.777-88;42 99999-2222;Nick@pet.com;M02;Profissional banho e tosa;2500.0
