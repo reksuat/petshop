@@ -1,4 +1,5 @@
 package petshop;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -63,7 +64,8 @@ public class Main {
                     
                     Cliente clienteLogin = Gerenciamento.buscarCliente(cpf);
                     if(clienteLogin != null) {
-                        menuClienteEntrou(clienteLogin); 
+                        menuClienteEntrou(clienteLogin); }
+                        else {
                         System.out.println("CPF não encontrado! Pressione Enter para continuar...");
                         sc.nextLine();
                     }
@@ -88,6 +90,12 @@ public class Main {
         System.out.println("--- CADASTRO DE NOVO CLIENTE ---");
         System.out.print("Nome: "); String nomeNovo = sc.nextLine();
         System.out.print("CPF: "); String cpfNovo = sc.nextLine();
+        if (Gerenciamento.buscarCliente(cpfNovo) != null) {
+            System.out.println("\n[Erro] CPF já cadastrado! Pressione Enter para voltar...");
+            sc.nextLine();
+            return null;
+        }
+
         System.out.print("Telefone: "); String telNovo = sc.nextLine();
         System.out.print("Email: "); String emailNovo = sc.nextLine();
         System.out.print("Endereço: "); String endNovo = sc.nextLine();
@@ -107,11 +115,6 @@ public class Main {
             System.out.println("--- BEM-VINDO, " + clienteLogin.getNome().toUpperCase() + " ---");
             System.out.println("1. Ver meu Perfil");
             System.out.println("2. Atualizar meus Dados");
-            System.out.println("3. [PET] Cadastrar Pet");
-            System.out.println("4. [PET] Atualizar Pet");
-            System.out.println("5. [PET] Listar Meus Pets");
-            System.out.println("6. [PET] Excluir Pet");
-            System.out.println("7. [SERVIÇO] Agendar Serviço");
             System.out.println("0. Fazer Logout");
             System.out.print("Escolha uma opção: ");
 
@@ -169,17 +172,138 @@ public class Main {
     
     private static void menuFuncionario() {
         limparTela();
-        System.out.print("Digite sua matrícula de funcionário: ");
+        System.out.print("Digite sua matrícula: ");
         String matricula = sc.nextLine();
-
-        if (Gerenciamento.validarFuncionario(matricula)) {
-            System.out.println("Painel do Funcionário Liberado. Pressione Enter para voltar...");
+        Funcionario funcLogin = Gerenciamento.buscarFuncionario(matricula);
+        if (funcLogin == null) {
+            System.out.println("\nMatrícula não cadastrada! Pressione Enter para voltar...");
             sc.nextLine();
-        } else {
-            System.out.println("Matrícula não cadastrada! Pressione Enter para voltar...");
-            sc.nextLine();
+            return;
         }
+        System.out.println("\nBem-vindo(a), " + funcLogin.getNome());
+        System.out.println("Pressione Enter para continuar...");
+        sc.nextLine();
+        menuFuncionarioEntrou(funcLogin);
     }
+    
+    private static void menuFuncionarioEntrou(Funcionario func) {
+        int opcao4 = -1;
+        while (opcao4 != 0) {
+            limparTela();
+            System.out.println("=== PAINEL DO FUNCIONÁRIO ===");
+            System.out.println("Logado como: " + func.getNome() + " [" + func.getCargo() + "]");
+            System.out.println("─────────────────────────────");
+            System.out.println("── CLIENTES ──");
+            System.out.println("1. Buscar Cliente por CPF");
+            System.out.println("2. Listar todos os Clientes");
+            System.out.println("3. Excluir Cliente");
+            System.out.println("─────────────────────────────");
+            System.out.println("── FUNCIONÁRIOS ──");
+            System.out.println("4. Ver meu Perfil");
+            System.out.println("─────────────────────────────");
+            System.out.println("0. Fazer Logout");
+            System.out.print("Escolha uma opção: ");
+ 
+            try {
+                opcao4 = Integer.parseInt(sc.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Erro: Digite apenas números. Pressione Enter para continuar...");
+                sc.nextLine();
+                continue;
+            }
+            switch (opcao4) {
+            case 1 -> {
+            	limparTela();
+            	System.out.println("--- BUSCAR CLIENTE ---");
+            	System.out.println("CPF do cliente: ");
+            	String cpf = sc.nextLine();
+                Cliente encontrado = Gerenciamento.buscarCliente(cpf);
+                if (encontrado != null) {
+                    System.out.println("\n[Encontrado]");
+                    System.out.println("Nome: "     + encontrado.getNome());
+                    System.out.println("CPF: "      + encontrado.getCpf());
+                    System.out.println("Telefone: " + encontrado.getTelefone());
+                    System.out.println("Email: "    + encontrado.getEmail());
+                    System.out.println("Endereço: " + encontrado.getEndereco());
+                } else {
+                    System.out.println("\n[Não encontrado] Nenhum cliente com esse CPF.");
+                }
+                System.out.println("\nPressione Enter para continuar...");
+                sc.nextLine();
+            }
+            case 2 -> {
+                limparTela();
+                System.out.println("--- LISTA DE CLIENTES ---");
+                List<Cliente> clientes = Gerenciamento.buscarTodosClientes();
+                if (clientes.isEmpty()) {
+                    System.out.println("Nenhum cliente cadastrado.");
+                } else {
+                    int i = 1;
+                    for (Cliente cli : clientes) {
+                        System.out.println("\n[" + i++ + "] " + cli.getNome()
+                            + " | CPF: " + cli.getCpf()
+                            + " | Tel: " + cli.getTelefone());
+                    }
+                }
+                System.out.println("\nPressione Enter para continuar...");
+                sc.nextLine();
+
+            }
+            case 3 -> {
+                limparTela();
+                System.out.println("--- EXCLUIR CLIENTE ---");
+                System.out.print("CPF do cliente a excluir: ");
+                String cpf = sc.nextLine();
+
+                Cliente cli = Gerenciamento.buscarCliente(cpf);
+                if (cli == null) {
+                    System.out.println("\n[Erro] Cliente não encontrado.");
+                    System.out.println("Pressione Enter para continuar...");
+                    sc.nextLine();
+                    break;
+                }
+
+                System.out.println("\nCliente encontrado: " + cli.getNome() + " | CPF: " + cli.getCpf());
+                System.out.print("Confirmar exclusão? (s/n): ");   // RNF2
+                String confirm = sc.nextLine();
+
+                if (confirm.equalsIgnoreCase("s")) {
+                    boolean ok = Gerenciamento.excluirCliente(cpf);
+                    System.out.println(ok
+                        ? "\n[Sucesso] Cliente excluído."
+                        : "\n[Erro] Não foi possível excluir.");
+                } else if (confirm.equalsIgnoreCase("n")){
+                    System.out.println("\nExclusão cancelada.");
+                }
+                System.out.println("Pressione Enter para continuar...");
+                sc.nextLine();
+
+            }
+            case 4 -> {
+                limparTela();
+                System.out.println("--- MEU PERFIL ---");
+                System.out.println("Nome: " + func.getNome());
+                System.out.println("CPF: " + func.getCpf());
+                System.out.println("Telefone: " + func.getTelefone());
+                System.out.println("Email: " + func.getEmail());
+                System.out.println("Cargo: " + func.getCargo());
+                System.out.println("Matrícula: " + func.getMatricula());
+                System.out.println("Salário: " + func.getSalario());
+                System.out.println("\nPressione Enter para continuar...");
+                sc.nextLine();
+            }
+
+            case 0 -> System.out.println("Efetuando logout...");
+
+            default -> {
+                System.out.println("Opção inválida! Pressione Enter para continuar...");
+                sc.nextLine();
+            }
+
+            }
+            }
+        }
+
 
     // simular a limpeza do console da IDE
     private static void limparTela() {

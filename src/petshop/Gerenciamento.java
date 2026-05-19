@@ -101,4 +101,76 @@ public class Gerenciamento {
         }
         return false;
     }
+
+    public static List<Cliente> buscarTodosClientes() {
+        List<Cliente> lista = new ArrayList<>();
+        File file = new File(ARQUIVO_CLIENTES);
+        if (!file.exists()) return lista;
+ 
+        try (BufferedReader br = new BufferedReader(new FileReader(ARQUIVO_CLIENTES))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                String[] d = linha.split(";");
+                if (d.length >= 5) {
+                    lista.add(new Cliente(d[0], d[1], d[2], d[3], d[4]));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao listar clientes: " + e.getMessage());
+        }
+        return lista;
+    }
+    
+    public static boolean excluirCliente(String cpfExcluir) {
+        File arquivo = new File(ARQUIVO_CLIENTES);
+        if (!arquivo.exists()) return false;
+ 
+        List<String> todasAsLinhas = new ArrayList<>();
+        boolean encontrado = false;
+ 
+        try (BufferedReader br = new BufferedReader(new FileReader(arquivo))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                String[] d = linha.split(";");
+                if (d.length >= 2 && d[1].equals(cpfExcluir)) {
+                    encontrado = true;          
+                } else {
+                    todasAsLinhas.add(linha);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao processar exclusão: " + e.getMessage());
+            return false;
+        }
+ 
+        if (!encontrado) return false;
+ 
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivo, false))) {
+            for (String l : todasAsLinhas) {
+                bw.write(l);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao salvar após exclusão: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
+    public static Funcionario buscarFuncionario(String matriculaBusca) {
+        try (BufferedReader br = new BufferedReader(new FileReader(ARQUIVO_FUNCIONARIOS))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                String[] d = linha.split(";");
+                if (d.length >= 7 && d[4].equalsIgnoreCase(matriculaBusca)) {
+                    return new Funcionario(d[0], d[1], d[2], d[3],
+                                          d[4], d[5], Double.parseDouble(d[6]));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao validar credenciais: " + e.getMessage());
+        }
+        return null;
+    }
+
+
 }
