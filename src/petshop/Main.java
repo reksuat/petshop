@@ -115,6 +115,8 @@ public class Main {
             System.out.println("--- BEM-VINDO, " + clienteLogin.getNome().toUpperCase() + " ---");
             System.out.println("1. Ver meu Perfil");
             System.out.println("2. Atualizar meus Dados");
+            System.out.println("3. Cadastrar meu Pet");
+            System.out.println("4. Ver meus Pets");
             System.out.println("0. Fazer Logout");
             System.out.print("Escolha uma opção: ");
 
@@ -157,7 +159,43 @@ public class Main {
                     System.out.println("Pressione Enter para continuar...");
                     sc.nextLine();
                 }
-                case 3, 4, 5, 6, 7 -> {
+                case 3 -> {
+                    limparTela();
+                    System.out.println("--- CADASTRAR MEU PET ---");
+                    System.out.print("ID do Pet: ");
+                    int id = Integer.parseInt(sc.nextLine());
+                    System.out.print("Nome do Pet: ");
+                    String nomePet = sc.nextLine();
+                    System.out.print("Espécie: ");
+                    String especie = sc.nextLine();
+                    System.out.print("Raça: ");
+                    String raca = sc.nextLine();
+                    System.out.print("Idade: ");
+                    int idade = Integer.parseInt(sc.nextLine());
+
+                    Pet novoPet = new Pet(id, nomePet, especie, raca, idade, clienteLogin);
+                    Gerenciamento.salvarPet(novoPet);
+                    System.out.println("\nPressione Enter para continuar...");
+                    sc.nextLine();
+                }
+                case 4 -> {
+                    limparTela();
+                    System.out.println("--- MEUS PETS ---");
+                    List<Pet> todosPets = Gerenciamento.listarPets();
+                    boolean temPet = false;
+                    for (Pet p : todosPets) {
+                        if (p.getDono().getCpf().equals(clienteLogin.getCpf())) {
+                            System.out.println("\nID: " + p.getId() + " | Nome: " + p.getNome() + " | Espécie: " + p.getEspecie() + " | Raça: " + p.getRaca() + " | Idade: " + p.getIdade() + " anos");
+                            temPet = true;
+                        }
+                    }
+                    if (!temPet) {
+                        System.out.println("Você ainda não tem pets cadastrados.");
+                    }
+                    System.out.println("\nPressione Enter para continuar...");
+                    sc.nextLine();
+                }
+                case 5, 6, 7 -> {
                     System.out.println("\n[Aviso] Funcionalidade a ser implementada pelo grupo. Pressione Enter...");
                     sc.nextLine();
                 }
@@ -198,8 +236,11 @@ public class Main {
             System.out.println("2. Listar todos os Clientes");
             System.out.println("3. Excluir Cliente");
             System.out.println("─────────────────────────────");
+            System.out.println("── PAINEL PETS ──");
+            System.out.println("4. Listar todos os Pets do Sistema");
+            System.out.println("─────────────────────────────");
             System.out.println("── FUNCIONÁRIOS ──");
-            System.out.println("4. Ver meu Perfil");
+            System.out.println("5. Ver meu Perfil");
             System.out.println("─────────────────────────────");
             System.out.println("0. Fazer Logout");
             System.out.print("Escolha uma opção: ");
@@ -280,6 +321,20 @@ public class Main {
 
             }
             case 4 -> {
+                limparTela();
+                System.out.println("--- TODOS OS PETS REGISTRADOS ---");
+                List<Pet> pets = Gerenciamento.listarPets();
+                if (pets.isEmpty()) {
+                    System.out.println("Nenhum pet cadastrado no sistema.");
+                } else {
+                    for (Pet p : pets) {
+                        System.out.println("\nID: " + p.getId() + " | Nome: " + p.getNome() + " | Espécie: " + p.getEspecie() + " | Dono: " + p.getDono().getNome() + " (CPF: " + p.getDono().getCpf() + ")");
+                    }
+                }
+                System.out.println("\nPressione Enter para continuar...");
+                sc.nextLine();
+            }
+            case 5 -> {
                 limparTela();
                 System.out.println("--- MEU PERFIL ---");
                 System.out.println("Nome: " + func.getNome());
