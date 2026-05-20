@@ -12,6 +12,7 @@ import java.util.List;
 public class Gerenciamento {
     private static final String ARQUIVO_CLIENTES = "clientes.txt";
     private static final String ARQUIVO_FUNCIONARIOS = "funcionarios.txt";
+    private static final String ARQUIVO_PETS = "pets.txt";
 
     public static void iniciarFuncionarios() {
         File file = new File(ARQUIVO_FUNCIONARIOS);
@@ -171,6 +172,44 @@ public class Gerenciamento {
         }
         return null;
     }
+    public static void salvarPet(Pet pet) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(ARQUIVO_PETS, true))) {
+            bw.write(pet.paraArquivo());
+            bw.newLine();
+            System.out.println("\n[Sucesso] Pet cadastrado com sucesso!");
+        } catch (IOException e) {
+            System.out.println("Erro ao salvar pet no arquivo: " + e.getMessage());
+        }
+    }
 
+    public static List<Pet> listarPets() {
+        List<Pet> lista = new ArrayList<>();
+        File file = new File(ARQUIVO_PETS);
+        if (!file.exists()) return lista;
 
+        try (BufferedReader br = new BufferedReader(new FileReader(ARQUIVO_PETS))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                String[] d = linha.split(";");
+                if (d.length >= 6) {
+                    int id = Integer.parseInt(d[0]);
+                    String nome = d[1];
+                    String especie = d[2];
+                    String raca = d[3];
+                    int idade = Integer.parseInt(d[4]);
+                    String cpfDono = d[5];
+
+                    Cliente dono = buscarCliente(cpfDono);
+                    if (dono == null) {
+                        dono = new Cliente("Desconhecido", cpfDono, "", "", "");
+                    }
+
+                    lista.add(new Pet(id, nome, especie, raca, idade, dono));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao listar pets: " + e.getMessage());
+        }
+        return lista;
+    }
 }
