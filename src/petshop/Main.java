@@ -476,11 +476,13 @@ public class Main {
             System.out.println("── PAINEL PETS ──");
             System.out.println("4. Listar todos os Pets do Sistema");
             System.out.println("─────────────────────────────");
-            System.out.println("── SERVIÇOS ──");
-            System.out.println("6. Atualizar status de serviço");
-            System.out.println("─────────────────────────────");
             System.out.println("── FUNCIONÁRIOS ──");
             System.out.println("5. Ver meu Perfil");
+            System.out.println("─────────────────────────────");
+            System.out.println("── SERVIÇOS ──");
+            System.out.println("6. Atualizar status de serviço");
+            System.out.println("7. Processar Pagamento de Serviço");
+            System.out.println("8. Listar Histórico de Pagamentos");
             System.out.println("─────────────────────────────");
             System.out.println("0. Fazer Logout");
             System.out.print("Escolha uma opção: ");
@@ -602,6 +604,46 @@ public class Main {
                     System.out.println("Pressione Enter para continuar...");
                     sc.nextLine();
                 }
+                case 7 -> {
+                    limparTela();
+                    System.out.println("--- PROCESSAR PAGAMENTO DE SERVIÇO ---");
+                    System.out.print("Digite o ID do Serviço a ser pago: ");
+                    try {
+                        int idServico = Integer.parseInt(sc.nextLine());
+                        Servico servico = Gerenciamento.buscarServicoPorId(idServico);
+
+                        if (servico == null) {
+                            System.out.println("\n[Erro] Serviço não encontrado!");
+                        } else if (servico.getStatus().equalsIgnoreCase("CONCLUIDO")) {
+                            System.out.println("\n[Aviso] Este serviço já consta como PAGO/CONCLUÍDO!");
+                        } else if (servico.getStatus().equalsIgnoreCase("CANCELADO")) {
+                            System.out.println("\n[Erro] Não é possível processar o pagamento de um serviço CANCELADO!");
+                        } else {
+                            System.out.println("\nServiço Encontrado: " + servico.getTipo() + " - Valor: R$ " + servico.getValor());
+                            System.out.print("Introduza a forma de pagamento (Dinheiro/Cartão/Pix): ");
+                            String formaPag = sc.nextLine();
+
+                            Pagamento pag = new Pagamento(servico, formaPag);
+                            pag.processar();
+                            pag.confirmar();
+
+                            Gerenciamento.salvarPagamento(pag);
+                            Gerenciamento.atualizarStatusServico(idServico, "CONCLUIDO");
+
+                            System.out.println("\n" + pag.recibo());
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Entrada inválida.");
+                    }
+                    System.out.println("\nPressione Enter para continuar...");
+                    sc.nextLine();
+                }
+                case 8 -> {
+                    limparTela();
+                    Gerenciamento.listarTodosPagamentos();
+                    System.out.println("\nPressione Enter para voltar ao menu...");
+                    sc.nextLine();
+                }
                 case 0 -> System.out.println("Efetuando logout...");
                 default -> {
                     System.out.println("Opção inválida! Pressione Enter para continuar...");
@@ -610,6 +652,7 @@ public class Main {
             }
         }
     }
+    
 
     private static void limparTela() {
         for (int i = 0; i < 50; i++) System.out.println();

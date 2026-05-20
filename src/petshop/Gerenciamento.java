@@ -14,6 +14,7 @@ public class Gerenciamento {
     private static final String ARQUIVO_FUNCIONARIOS = "funcionarios.txt";
     private static final String ARQUIVO_PETS         = "pets.txt";
     private static final String ARQUIVO_SERVICOS     = "servicos.txt";
+    private static final String ARQUIVO_PAGAMENTOS   = "pagamentos.txt";
 
     public static void iniciarFuncionarios() {
         File file = new File(ARQUIVO_FUNCIONARIOS);
@@ -332,6 +333,73 @@ public class Gerenciamento {
             for (String l : linhas) { bw.write(l); bw.newLine(); }
         } catch (IOException e) {
             System.out.println("Erro ao salvar atualização: " + e.getMessage());
+        }
+    }
+ // ─────────────────────────── PAGAMENTOS ───────────────────────────────
+
+    public static void salvarPagamento(Pagamento pagamento) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(ARQUIVO_PAGAMENTOS, true))) {
+            bw.write(pagamento.paraArquivo());
+            bw.newLine();
+            System.out.println("\n[Sucesso] Pagamento registado no arquivo!");
+        } catch (IOException e) {
+            System.out.println("Erro ao salvar pagamento no arquivo: " + e.getMessage());
+        }
+    }
+
+    public static Servico buscarServicoPorId(int idBusca) {
+        File file = new File(ARQUIVO_SERVICOS);
+        if (!file.exists()) return null;
+
+        List<Funcionario> funcionarios = buscarTodosFuncionarios();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                String[] d = linha.split(";");
+                if (d.length >= 7 && Integer.parseInt(d[0]) == idBusca) {
+                    Funcionario func = funcionarios.stream()
+                            .filter(f -> f.getMatricula().equals(d[4]))
+                            .findFirst()
+                            .orElse(null);
+                    
+                    if (func == null) func = new Funcionario("Desconhecido", "", "", "", d[4], "", 0.0);
+
+                    Pet pet = buscarPetPorId(Integer.parseInt(d[5]));
+
+                    Servico s = new Servico(Integer.parseInt(d[0]), d[1], d[2],
+                                            Double.parseDouble(d[3]), func, pet);
+                    s.setStatus(d[6]);
+                    return s;
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("Erro ao buscar serviço por ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public static void listarTodosPagamentos() {
+        File file = new File(ARQUIVO_PAGAMENTOS);
+        if (!file.exists()) {
+            System.out.println("Nenhum pagamento registado até ao momento.");
+            return;
+        }
+
+        System.out.println("--- TODOS OS PAGAMENTOS REGISTADOS ---");
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                String[] d = linha.split(";");
+                if (d.length >= 4) {
+                    System.out.println("\nServiço ID: " + d[0] 
+                        + " | Valor: R$ " + d[1] 
+                        + " | Forma: " + d[2] 
+                        + " | Confirmado: " + (Boolean.parseBoolean(d[3]) ? "SIM" : "NÃO"));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao ler arquivo de pagamentos: " + e.getMessage());
         }
     }
 }
